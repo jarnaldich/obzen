@@ -6,6 +6,8 @@ from rich.table import Table
 from rich.panel import Panel
 from rich import print as rprint
 
+from obsidiantools.api import Vault
+
 app = typer.Typer(
     name="obzen",
     help="CLI tool for managing your personal Obsidian vault",
@@ -36,11 +38,31 @@ def list(
     tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Filter by tags"),
 ):
     """List notes in the vault."""
-    console.print(Panel.fit("Listing notes...", style="cyan"))
-    # TODO: Implement with obsidiantools
+    if vault_path is None:
+        console.print("[red]Error:[/red] No vault path provided")
+        raise typer.Exit(code=1)
+
+    vault_path = Path(vault_path)
+    console.print(Panel.fit(f"Listing notes from {vault_path}...", style="cyan"))
+
+    vault = Vault(vault_path).connect()
+
     table = Table(title="Notes")
     table.add_column("Name", style="cyan")
     table.add_column("Tags", style="magenta")
+
+    tag_filter = None
+    if tags:
+        tag_filter = [t.strip() for t in tags.split(",")]
+
+    for note in sorted(vault.md_file_index.keys()):
+        note_tags = vault.tags_index.get(note, [])
+        if tag_filter:
+            # Check if any of the filter tags are in note tags
+            if not any(f in note_tags for f in tag_filter):
+                continue
+        table.add_row(note, ", ".join(note_tags) if note_tags else "")
+
     console.print(table)
 
 
