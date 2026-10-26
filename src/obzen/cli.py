@@ -1,10 +1,12 @@
 import typer
+import os
 from typing import Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich import print as rprint
+from dotenv import load_dotenv
 
 from obsidiantools.api import Vault
 
@@ -16,6 +18,7 @@ app = typer.Typer(
 
 console = Console()
 
+load_dotenv()
 
 @app.command()
 def init(
@@ -29,17 +32,54 @@ def init(
     # TODO: Save config
     console.print("[green]Done![/green]")
 
+@app.command()
+def import_tasks(
+    vault_path: Optional[Path] = typer.Option(
+        os.getenv("VAULT_PATH"), "--vault", "-v", help="Path to your Obsidian vault"
+    ),
+    csv_path: Optional[Path] = typer.Option(
+        os.getenv("CSV_PATH"), "--csv", "-c", help="Path to your CSV tasks"
+    ),
+):
+    """Import tasks from the vault."""
+    if vault_path is None:
+        console.print("[red]Error:[/red] No vault path provided")
+        raise typer.Exit(code=1)
+
+    if not os.path.exists(vault_path):
+        console.print(f"[red]Error:[/red] Vault path does not exist: {vault_path}")
+        raise typer.Exit(code=1)
+
+    vault_path = Path(vault_path)
+    console.print(Panel.fit(f"Importing tasks from {vault_path}...", style="cyan"))
+    if csv_path is None:
+        console.print("[red]Error:[/red] No CSV path provided")
+        raise typer.Exit(code=1)
+
+    if not os.path.exists(csv_path):
+        console.print(f"[red]Error:[/red] CSV path does not exist: {csv_path}")
+        raise typer.Exit(code=1)
+
+    csv_path = Path(csv_path)
+
+    # TODO: Implement task import
+    console.print("[green]Done![/green]")
+
 
 @app.command()
 def list(
     vault_path: Optional[Path] = typer.Option(
-        None, "--vault", "-v", help="Path to your Obsidian vault"
+        os.getenv("VAULT_PATH"), "--vault", "-v", help="Path to your Obsidian vault"
     ),
     tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Filter by tags"),
 ):
     """List notes in the vault."""
     if vault_path is None:
         console.print("[red]Error:[/red] No vault path provided")
+        raise typer.Exit(code=1)
+    
+    if not os.path.exists(vault_path):
+        console.print(f"[red]Error:[/red] Vault path does not exist: {vault_path}")
         raise typer.Exit(code=1)
 
     vault_path = Path(vault_path)
