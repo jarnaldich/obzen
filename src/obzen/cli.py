@@ -8,6 +8,8 @@ from rich.panel import Panel
 from rich import print as rprint
 from dotenv import load_dotenv
 
+from .task_importer import TaskImporter
+
 from obsidiantools.api import Vault
 
 app = typer.Typer(
@@ -62,7 +64,7 @@ def import_tasks(
 
     csv_path = Path(csv_path)
 
-    # TODO: Implement task import
+    task_importer = TaskImporter(csv_path, vault_path)
     console.print("[green]Done![/green]")
 
 
@@ -95,7 +97,15 @@ def list(
     if tags:
         tag_filter = [t.strip() for t in tags.split(",")]
 
-    for note in sorted(vault.md_file_index.keys()):
+    console.print(f"[green]Filtering notes by tags:[/green] {vault.md_file_index}")
+
+    # filter the dict for the entries with the key containing "TaskNotes"
+    notes = {
+        k: v 
+        for k, v in vault.md_file_index.items() 
+        if ("TaskNotes" in k) and not ("TaskNotes/Archive" in k)}
+
+    for note in sorted(notes.keys()):
         note_tags = vault.tags_index.get(note, [])
         if tag_filter:
             # Check if any of the filter tags are in note tags

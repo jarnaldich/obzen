@@ -483,6 +483,7 @@ source = { editable = "." }
 dependencies = [
     { name = "dotenv" },
     { name = "obsidiantools" },
+    { name = "pandas" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "typer" },
@@ -492,6 +493,7 @@ dependencies = [
 requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "obsidiantools", specifier = ">=0.11.0" },
+    { name = "pandas", specifier = ">=3.1.0" },
     { name = "pydantic", specifier = ">=2.14.1" },
     { name = "rich", specifier = ">=15.0.0" },
     { name = "typer", specifier = ">=0.27.3" },
